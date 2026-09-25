@@ -3,7 +3,7 @@ export type LoginKind = "student_number" | "email";
 export interface LoginResponse {
   message: string;
   csrfToken: string;
-  redirectTo: "/student" | "/admin";
+  redirectTo: "/student" | "/administrator";
   user: {
     id: string;
     email: string;

@@ -50,7 +50,7 @@ const App = () => {
         "currentUser",
         JSON.stringify(response.user)
       );
-      if (response.redirectTo === "/admin") {
+      if (response.redirectTo === "/administrator") {
         window.location.assign("http://localhost:5174");
       } else if (response.redirectTo === "/student") {
         window.location.assign("http://localhost:5175");
