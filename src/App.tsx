@@ -1,4 +1,6 @@
 import { type SubmitEvent, useRef, useState } from "react";
+import { isApiError } from "./lib/typeGuard";
+
 import type { LoginResponse } from "./types/auth";
 import { authService } from "./services/auth.service";
 import logoTecnm from "./assets/tecnmlogo.png";
@@ -55,19 +57,24 @@ const App = () => {
       } 
       // window.location.assign(response.redirectTo);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Ocurrió un error inesperado";
+      if (isApiError(error)) {
+        setError(error.message);
+        return;
+      }
 
-      setError(message);
+      if (error instanceof Error) {
+        setError(error.message);
+        return;
+      }
+
+      setError("Ocurrió un error inesperado al iniciar sesión.");
     } finally {
       setIsSubmitting(false);
     }
   }
   return (
     <main className="flex min-h-screen w-full items-center justify-center bg-(--steel-200)">
-      <form className="flex h-min w-min flex-col items-center justify-start rounded-lg bg-(--steel-100) p-12 gap-6 border border-(--steel-300)" onSubmit={handleSubmit}>
+      <form className="flex h-min w-min flex-col items-center justify-start rounded-lg bg-(--steel-100) py-12 px-16 gap-4 border border-(--steel-300)" onSubmit={handleSubmit}>
         <section className="flex w-full h-min items-center justify-center gap-12">
           <div className="flex size-22 items-center justify-center">
             <img src={logoTecnm} className="size-full object-contain" alt="" />
@@ -106,7 +113,7 @@ const App = () => {
               }}
               disabled={isSubmitting}
               placeholder="22150001 o su@correo.com"
-              className="w-full rounded-sm border border-(--steel-300) py-3 pr-4 pl-11 outline-none transition bg-(--steel-200) focus:border-blue-700 text-xs"
+              className="w-full rounded-sm border border-(--steel-300) py-3 pr-4 pl-11 outline-none transition bg-(--steel-200) focus:border-(--main-color) text-xs disabled:cursor-not-allowed disabled:opacity-60"
             />
           </div>
         </label>
@@ -134,7 +141,7 @@ const App = () => {
               onChange={(event) => setPassword(event.target.value)}
               disabled={isSubmitting}
               placeholder="••••••••"
-              className="w-full rounded-sm border border-(--steel-300) bg-(--steel-200) py-3 pr-11 pl-11 text-xs outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-sm border border-(--steel-300) bg-(--steel-200) py-3 pr-11 pl-11 text-xs outline-none transition focus:border-(--main-color) disabled:cursor-not-allowed disabled:opacity-60"
             />
 
             <button
@@ -144,7 +151,7 @@ const App = () => {
               aria-label={
                 typePass === "password" ? "Mostrar contraseña" : "Ocultar contraseña"
               }
-              className="absolute cursor-pointer top-1/2 right-3 flex -translate-y-1/2 items-center justify-center text-(--steel-600) transition-colors hover:text-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-900 disabled:cursor-not-allowed disabled:opacity-50"
+              className="absolute cursor-pointer top-1/2 right-3 flex -translate-y-1/2 items-center justify-center text-(--steel-600)  focus:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {typePass === "password" ? (
                 <EyeIcon aria-hidden="true" size={20} />
@@ -155,14 +162,7 @@ const App = () => {
           </div>
         </label>
 
-        {error && (
-          <p
-            className="rounded-md bg-red-50 p-3 text-sm text-red-700"
-            role="alert"
-          >
-            {error}
-          </p>
-        )}
+        
 
         <button
           type="submit"
@@ -182,6 +182,16 @@ const App = () => {
             {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
           </span>
         </button>
+        <p className="text-xs text-center block w-70 text-(--steel-500)">
+          Para restablecer su contraseña, por favor contacte al administrador.
+        </p>
+
+          <p
+            className={`rounded-xs bg-red-50 flex items-center justify-center h-6 px-2 text-[10px] text-red-700 ` + (error ? "visible" : "invisible")}
+            role="alert"
+          >
+            {error}
+          </p>
       </form>
     </main>
   );
