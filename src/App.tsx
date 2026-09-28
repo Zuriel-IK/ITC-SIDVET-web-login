@@ -29,7 +29,9 @@ const App = () => {
     event.preventDefault();
 
     if (!numberOrEmail.trim() || !password) {
-      setError("Ingresa tu número de control o correo y tu contraseña");
+      setError(
+        "Ingresa tu número de control o correo y tu contraseña"
+      );
       return;
     }
 
@@ -50,10 +52,10 @@ const App = () => {
         "currentUser",
         JSON.stringify(response.user)
       );
-      if (response.redirectTo === "/administrator") {
-        window.location.assign("http://localhost:5174");
-      } else if (response.redirectTo === "/student") {
-        window.location.assign("http://localhost:5175");
+      if (response.redirectTo === "/administrador") {
+        window.location.assign("http://localhost:5174/administrador");
+      } else if (response.redirectTo === "/alumno") {
+        window.location.assign("http://localhost:5175/alumno");
       } 
       // window.location.assign(response.redirectTo);
     } catch (error) {

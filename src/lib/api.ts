@@ -1,3 +1,4 @@
+import type { ErrorResponse } from "@/types/auth";
 import axios, { AxiosError } from "axios";
 
 export interface ApiError {
@@ -9,6 +10,7 @@ export interface ApiError {
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
   timeout: 10000,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -16,10 +18,8 @@ const api = axios.create({
 
 
 api.interceptors.response.use(
-  (response) => {
-    return response.data;
-  },
-  (error: AxiosError<{ message?: string; error?: string; errors?: Record<string, string[]> }>) => {
+  (response) =>  response.data,
+  (error: AxiosError<ErrorResponse>) => {
     const status = error.response?.status;
     const data = error.response?.data;
 
@@ -41,10 +41,8 @@ api.interceptors.response.use(
 
       case 401:
         apiError.message =
-          data?.message || "Tu sesión expiró o no es válida.";
-
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("user");
+          data?.message ||
+          "Credenciales incorrectas o sesión no válida.";
         break;
 
       case 403:
