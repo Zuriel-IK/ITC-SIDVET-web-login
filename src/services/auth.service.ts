@@ -1,5 +1,5 @@
 import api from "../lib/api";
-import type { LoginCredentials, LoginResponse } from "../types/auth";
+import type { LoginCredentials, LoginResponse, MeResponse } from "../types/auth";
 
 
 export const authService = {
@@ -7,6 +7,13 @@ export const authService = {
     return api.post<LoginResponse, LoginResponse>(
       "/auth/login",
       credentials
+    );
+  },
+
+   getMe(signal?: AbortSignal) {
+    return api.get<MeResponse, MeResponse>(
+      "/auth/me",
+      { signal },
     );
   },
 };

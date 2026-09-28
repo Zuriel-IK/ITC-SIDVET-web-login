@@ -1,4 +1,4 @@
-import { type SubmitEvent, useRef, useState } from "react";
+import { type SubmitEvent, useEffect, useRef, useState } from "react";
 import { isApiError } from "./lib/typeGuard";
 
 import type { LoginResponse } from "./types/auth";
@@ -11,6 +11,37 @@ import { EyeOffIcon } from "./components/ui/eye-off";
 import { EyeIcon } from "lucide-react";
 import { LogInIcon, type LogInIconHandle } from "./components/ui/login";
 
+type SessionCheck =
+  | "checking"
+  | "login"
+  | "error";
+
+const ADMIN_URL =
+  import.meta.env.VITE_ADMIN_URL ||
+  "http://localhost:5174/administrador";
+
+const STUDENT_URL =
+  import.meta.env.VITE_STUDENT_URL ||
+  "http://localhost:5175/alumno";
+
+function redirectToApp(
+  availableApps: Array<"ADMIN" | "STUDENT">,
+) {
+  if (availableApps.includes("ADMIN")) {
+    window.location.replace(ADMIN_URL);
+    return;
+  }
+
+  if (availableApps.includes("STUDENT")) {
+    window.location.replace(STUDENT_URL);
+    return;
+  }
+
+  throw new Error(
+    "Tu cuenta no tiene una aplicación asignada.",
+  );
+}
+
 const App = () => {
   const [numberOrEmail, setNumberOrEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +51,54 @@ const App = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [typePass, setTypePass] = useState("password")
+
+  const [sessionCheck, setSessionCheck] =
+  useState<SessionCheck>("checking");
+
+  const [sessionError, setSessionError] =
+    useState<string | null>(null);
+
+  const [checkAttempt, setCheckAttempt] =
+    useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function checkSession() {
+      setSessionCheck("checking");
+      setSessionError(null);
+
+      try {
+        const { user } = await authService.getMe(
+          controller.signal,
+        );
+
+        if (controller.signal.aborted) return;
+
+        redirectToApp(user.availableApps);
+      } catch (error: unknown) {
+        if (controller.signal.aborted) return;
+
+        if (isApiError(error) && error.status === 401) {
+          setSessionCheck("login");
+          return;
+        }
+
+        setSessionError(
+          isApiError(error) || error instanceof Error
+            ? error.message
+            : "No fue posible comprobar tu sesión.",
+        );
+        setSessionCheck("error");
+      }
+    }
+
+    void checkSession();
+
+    return () => controller.abort();
+  }, [checkAttempt]);
+
+
   const handleViewPass = () => {
     setTypePass((currentType) =>
       currentType === "password" ? "text" : "password"
@@ -73,6 +152,27 @@ const App = () => {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (sessionCheck === "checking") {
+    return <p>Comprobando sesión...</p>;
+  }
+
+  if (sessionCheck === "error") {
+    return (
+      <main>
+        <p role="alert">{sessionError}</p>
+
+        <button
+          type="button"
+          onClick={() => {
+            setCheckAttempt((attempt) => attempt + 1);
+          }}
+        >
+          Reintentar
+        </button>
+      </main>
+    );
   }
   return (
     <main className="flex min-h-screen w-full items-center justify-center bg-(--steel-200)">

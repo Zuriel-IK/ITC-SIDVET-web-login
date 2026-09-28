@@ -24,3 +24,19 @@ export interface ErrorResponse {
   error?: string;
   errors?: Record<string, string[]>;
 }
+
+export interface AuthenticatedUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastNamePaternal: string;
+  lastNameMaternal: string | null;
+  status: string;
+  roles: string[];
+  availableApps: Array<"ADMIN" | "STUDENT">;
+  redirectTo: "/administrador" | "/alumno" | null;
+}
+
+export interface MeResponse {
+  user: AuthenticatedUser;
+}
