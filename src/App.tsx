@@ -10,6 +10,7 @@ import { KeyCircleIcon, type KeyIconHandle } from "./components/ui/key-circle";
 import { EyeOffIcon } from "./components/ui/eye-off";
 import { EyeIcon } from "lucide-react";
 import { LogInIcon, type LogInIconHandle } from "./components/ui/login";
+import LatticeLoader from "./components/LatticeLoader/LatticeLoader";
 
 type SessionCheck =
   | "checking"
@@ -155,7 +156,15 @@ const App = () => {
   }
 
   if (sessionCheck === "checking") {
-    return <p>Comprobando sesión...</p>;
+    return <div className="w-scree min-h-screen flex justify-center items-center bg-(--steel-200)">
+      <LatticeLoader
+          status="working"
+          label="Comprobando Sesion"
+          pattern="orbit"
+          grid={4}
+          className="text-(--steel-600)"
+        />
+    </div>
   }
 
   if (sessionCheck === "error") {
